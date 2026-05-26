@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create ec2, s3, vpc, subnet along with metadata, parameters and resources
+
+Resources:
+  MyEC2:
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: !Ref AmiImageId
+      InstanceType: !Ref ec2InstanceType
+      SubnetId: !Ref MySubnet
+      Tags:
+        - Key: Project
+          Value: Banking
+
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: True
+      Tags:
+        - Key: Project
+          Value: Banking
+  
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SubnetCidr
+      VpcId: !Ref MyVPC
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Project
+          Value: Banking
+
+  MyBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref myBucketName
+      Tags:
+        - Key: Project
+          Value: Banking
+
+Parameters: 
+  AmiImageId:
+    Description: Provide ami image id
+    Type: String
+    ConstraintDescription: Must be a valid AMI ID (e.g. ami-xxxxxxxxxxxxxxxxx)
+
+  ec2InstanceType:
+    Description: Provide instance type
+    Type: String
+    Default: t3.micro
+    AllowedValues: 
+    - t3.micro
+    - t3.small
+
+  VpcCidr:
+    Description: Provide VPC CIDR
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedValues: 
+    - 10.0.0.0/16
+    - 10.0.0.0/8
+
+  SubnetCidr:
+    Description: Provide Subnet CIDR
+    Type: String
+    Default: 10.0.1.0/24
+    AllowedValues: 
+    - 10.0.1.0/24
+    - 10.0.2.0/24
+    - 10.0.3.0/24
+
+  myBucketName:
+    Description: Bucket name 
+    Type: String
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VpcCidr
+          - SubnetCidr
+      - Label:
+          default: Compute Configuration
+        Parameters:
+          - AmiImageId
+          - ec2InstanceType
+      - Label:
+          default: StorageConfiguration
+        Parameters:
+          - myBucketName
